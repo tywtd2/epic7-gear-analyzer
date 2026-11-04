@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Epic Seven gear analyzer</title>
+  <link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+  <header class="banner">
+    <h1 id="title"></h1>
+    <p id="intro"></p>
+  </header>
+  <main class="layout">
+    <form id="gear-form" class="panel" novalidate>
+      <div class="field-grid">
+        <label for="slot"><span id="slot-label"></span>
+          <select id="slot"></select>
+        </label>
+        <label for="level"><span id="level-label"></span>
+          <select id="level"></select>
+        </label>
+        <label for="grade"><span id="grade-label"></span>
+          <select id="grade"></select>
+        </label>
+        <label for="enhance"><span id="enhance-label"></span>
+          <select id="enhance"></select>
+        </label>
+        <label for="main"><span id="main-label"></span>
+          <select id="main"></select>
+        </label>
+      </div>
+      <p id="level-note" hidden></p>
+      <fieldset id="substats">
+        <legend id="substats-legend"></legend>
+        <div class="sub-row" id="sub-row-1">
+          <label for="sub-stat-1"><span id="sub-stat-label-1"></span>
+            <select id="sub-stat-1"></select>
+          </label>
+          <label for="sub-value-1"><span id="sub-value-label-1"></span>
+            <input id="sub-value-1" type="number" inputmode="numeric" step="1" min="0" autocomplete="off">
+          </label>
+        </div>
+        <div class="sub-row" id="sub-row-2">
+          <label for="sub-stat-2"><span id="sub-stat-label-2"></span>
+            <select id="sub-stat-2"></select>
+          </label>
+          <label for="sub-value-2"><span id="sub-value-label-2"></span>
+            <input id="sub-value-2" type="number" inputmode="numeric" step="1" min="0" autocomplete="off">
+          </label>
+        </div>
+        <div class="sub-row" id="sub-row-3">
+          <label for="sub-stat-3"><span id="sub-stat-label-3"></span>
+            <select id="sub-stat-3"></select>
+          </label>
+          <label for="sub-value-3"><span id="sub-value-label-3"></span>
+            <input id="sub-value-3" type="number" inputmode="numeric" step="1" min="0" autocomplete="off">
+          </label>
+        </div>
+        <div class="sub-row" id="sub-row-4">
+          <label for="sub-stat-4"><span id="sub-stat-label-4"></span>
+            <select id="sub-stat-4"></select>
+          </label>
+          <label for="sub-value-4"><span id="sub-value-label-4"></span>
+            <input id="sub-value-4" type="number" inputmode="numeric" step="1" min="0" autocomplete="off">
+          </label>
+        </div>
+      </fieldset>
+      <button type="submit" id="calculate"></button>
+    </form>
+    <aside id="results" class="panel tone-neutral">
+      <section class="result" aria-live="polite">
+        <h2 id="summary-title"></h2>
+        <p id="summary-text"></p>
+        <p id="summary-extra" hidden></p>
+      </section>
+      <section class="result">
+        <h2 id="score-title"></h2>
+        <p id="score-text"></p>
+        <p id="score-note" hidden></p>
+      </section>
+      <section class="result">
+        <h2 id="detail-title"></h2>
+        <p id="detail-hint" hidden></p>
+        <div id="detail-text"></div>
+        <p id="reforge-text" hidden></p>
+      </section>
+    </aside>
+  </main>
+  <script src="strings.js?v=7"></script>
+  <script src="tables.js?v=5"></script>
+  <script src="rolls.js?v=7"></script>
+  <script src="score.js?v=5"></script>
+  <script src="verdict.js?v=5"></script>
+  <script src="page.js?v=8"></script>
+</body>
+</html>

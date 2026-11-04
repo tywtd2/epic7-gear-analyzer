@@ -1,0 +1,281 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #f4efe4;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(196, 154, 74, 0.18), transparent 55%),
+    #10141c;
+  font: 16px/1.45 "Segoe UI", system-ui, sans-serif;
+}
+
+.banner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem max(1.5rem, env(safe-area-inset-right)) 0.25rem max(1.5rem, env(safe-area-inset-left));
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #f0d7a2;
+}
+
+.banner p {
+  max-width: 40rem;
+  margin: 0.45rem 0 0;
+  color: #c9c0b0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  gap: 1.25rem;
+  align-items: start;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem max(1.5rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+}
+
+.panel {
+  background: #1a2030;
+  border: 1px solid #3a3428;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  padding: 1.1rem 1.15rem 1.2rem;
+}
+
+#results {
+  position: sticky;
+  top: 1rem;
+  border-top: 4px solid #8d7344;
+  scroll-margin-top: 0.75rem;
+}
+
+#results.tone-keep {
+  border-top-color: #7dcea0;
+}
+
+#results.tone-sell {
+  border-top-color: #e07a5f;
+}
+
+#results.tone-extract {
+  border-top-color: #d4a017;
+}
+
+h2 {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c4a36a;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 0.9rem;
+}
+
+label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #d9d0c2;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  font-size: 1rem;
+  color: #f4efe4;
+}
+
+input,
+select {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.28rem;
+  padding: 0.5rem 0.6rem;
+  font-weight: 400;
+  color: #f4efe4;
+  background: #0e131c;
+  border: 1px solid #4a4336;
+  border-radius: 8px;
+}
+
+select:disabled {
+  color: #b7ad9d;
+  background: #161b26;
+}
+
+input::placeholder {
+  color: #9a9186;
+  opacity: 1;
+}
+
+input.invalid {
+  border-color: #e07a5f;
+}
+
+button {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.9rem;
+  padding: 0.72rem 0.8rem;
+  font-weight: 700;
+  color: #1a1408;
+  background: #e0c27a;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f0d7a2;
+}
+
+button:focus,
+select:focus,
+input:focus {
+  outline: 3px solid #e0c27a;
+  outline-offset: 2px;
+}
+
+#level-note {
+  margin: 0.55rem 0 0;
+  color: #c9c0b0;
+  font-size: 0.9rem;
+}
+
+fieldset {
+  margin: 0.95rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  margin-bottom: 0.45rem;
+  padding: 0;
+  font-weight: 700;
+  color: #f0d7a2;
+}
+
+.sub-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8.75rem;
+  gap: 0.7rem;
+  margin-bottom: 0.55rem;
+}
+
+.result + .result {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #34303a;
+}
+
+#summary-text {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #f4efe4;
+  overflow-wrap: break-word;
+}
+
+#summary-extra {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #f4efe4;
+}
+
+#score-text {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #f0d7a2;
+}
+
+#score-note,
+#detail-text,
+#detail-hint,
+#reforge-text {
+  margin: 0.35rem 0 0;
+  color: #c9c0b0;
+}
+
+.roll-count {
+  display: inline-block;
+  width: 3.2rem;
+  height: auto;
+  margin: 0 0.15rem;
+  padding: 0.15rem 0.3rem;
+  text-align: center;
+}
+
+#detail-text ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+#detail-text li {
+  margin: 0.3rem 0;
+  overflow-wrap: break-word;
+}
+
+/* Phones and portrait tablets stack. A landscape tablet stays side by side. */
+@media (max-width: 56rem) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  #results {
+    position: static;
+  }
+
+  .roll-count {
+    width: 4.25rem;
+    min-height: 2.75rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .banner,
+  .layout {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sub-row {
+    grid-template-columns: minmax(0, 1fr) 8rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  #summary-text {
+    font-size: 1.2rem;
+  }
+}
