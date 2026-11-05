@@ -372,25 +372,25 @@ function buildDetailList(piece, rollCounts) {
     input.min = "1";
     input.max = String(tables.maxRolls);
     input.step = "1";
-    input.setAttribute("aria-label", strings.stats[sub.stat] + " roll count");
+    input.setAttribute("aria-label", strings.rollCountLabel.replace("{name}", strings.stats[sub.stat]));
     if (rollCounts[i] !== "") {
       input.value = String(rollCounts[i]);
     }
-    appendText(item, strings.stats[sub.stat] + " rolled ");
+    appendText(item, strings.detailLead.replace("{name}", strings.stats[sub.stat]));
     item.appendChild(input);
     appendText(item, " ");
     var unit = document.createElement("span");
     unit.className = "detail-unit";
     item.appendChild(unit);
-    appendText(item, ": " + String(sub.value) + " / ");
+    appendText(item, strings.detailColon + String(sub.value) + strings.detailSlash);
     var max = document.createElement("span");
     max.className = "detail-max";
     item.appendChild(max);
-    appendText(item, ", ");
+    appendText(item, strings.detailComma);
     var points = document.createElement("span");
     points.className = "detail-points";
     item.appendChild(points);
-    appendText(item, " points.");
+    appendText(item, strings.detailTail);
     list.appendChild(item);
   }
   box.appendChild(list);
@@ -472,6 +472,7 @@ function rollsWereEntered(rollCounts) {
 
 function present(piece, rollCounts, rebuild) {
   var totalRolls = tables.rollTotals[piece.grade][String(piece.enhance)];
+  lastRolls = rollCounts.slice();
   var fit = { ok: false, reason: "range" };
   var scored = null;
   var hint = document.getElementById("detail-hint");
@@ -502,6 +503,9 @@ function present(piece, rollCounts, rebuild) {
 }
 
 var currentPiece = null;
+var lastRolls = null;
+var resultMode = "waiting";
+var currentLanguage = "en";
 
 function showSummary(result) {
   var panel = document.getElementById("results");
@@ -555,6 +559,7 @@ function onCalculate(event) {
   piece = readForm();
   if (piece.error) {
     currentPiece = null;
+    resultMode = "error";
     showSummary({ text: piece.error, extra: "", tone: "tone-neutral" });
     showScore("", false);
     showDetailMessage("");
@@ -568,6 +573,7 @@ function onCalculate(event) {
   assigned = assignRolls(piece.level, piece.subs, totalRolls);
   if (!assigned.ok) {
     currentPiece = null;
+    resultMode = "error";
     showSummary({
       text: strings.impossibleSplit.replace("{piece}", strings.grades[piece.grade] + " " + strings.enhances[String(piece.enhance)]),
       extra: "",
@@ -579,12 +585,47 @@ function onCalculate(event) {
     showResultOnNarrowScreen();
     return;
   }
+  resultMode = "ready";
   present(piece, assigned.rolls, true);
   showResultOnNarrowScreen();
 }
 
-function start() {
+function languageFromLocation() {
+  var params = new URLSearchParams(window.location.search);
+  var query = params.get("lang");
+  if (query === "tw" || query === "zh" || query === "zh-Hant" || query === "zh-TW" || query === "zh-HK") {
+    return "zh-Hant";
+  }
+  if (query === "en") {
+    return "en";
+  }
+  return "";
+}
+
+function savedLanguage() {
+  var saved = "";
+  try {
+    saved = localStorage.getItem("epic7-gear-lang") || "";
+  } catch (error) {
+    saved = "";
+  }
+  if (saved === "zh-Hant" || saved === "en") {
+    return saved;
+  }
+  return "";
+}
+
+function rememberLanguage(lang) {
+  try {
+    localStorage.setItem("epic7-gear-lang", lang);
+  } catch (error) {
+    return;
+  }
+}
+
+function paintLanguage() {
   var n;
+  document.documentElement.lang = currentLanguage === "zh-Hant" ? "zh-Hant" : "en";
   document.title = strings.title;
   setText("title", strings.title);
   setText("intro", strings.intro);
@@ -599,17 +640,57 @@ function start() {
   setText("score-title", strings.scoreTitle);
   setText("detail-title", strings.detailTitle);
   setText("score-note", strings.scoreNote);
-  showSummary({ text: strings.waiting, extra: "", tone: "tone-neutral" });
+  setText("lang-en", strings.langEnglish);
+  setText("lang-zh", strings.langChinese);
+  document.getElementById("lang-en").setAttribute("aria-pressed", currentLanguage === "en" ? "true" : "false");
+  document.getElementById("lang-zh").setAttribute("aria-pressed", currentLanguage === "zh-Hant" ? "true" : "false");
   for (n = 1; n <= 4; n++) {
     setText("sub-stat-label-" + n, strings.substat + " " + n);
     setText("sub-value-label-" + n, strings.value + " " + n);
   }
-
   fillSelect(document.getElementById("slot"), optionsFromIds(tables.slotOrder, strings.slots));
   fillSelect(document.getElementById("level"), optionsFromIds(tables.levelOrder, strings.levels));
   fillSelect(document.getElementById("grade"), optionsFromIds(tables.gradeOrder, strings.grades));
   fillSelect(document.getElementById("enhance"), enhanceOptions());
+  onSlotChange();
+  onLevelChange();
+}
 
+function refreshResultLanguage() {
+  var piece;
+  if (resultMode === "ready" && currentPiece && lastRolls) {
+    present(currentPiece, lastRolls, true);
+    return;
+  }
+  if (resultMode === "error") {
+    piece = readForm();
+    if (piece.error) {
+      showSummary({ text: piece.error, extra: "", tone: "tone-neutral" });
+      return;
+    }
+  }
+  showSummary({ text: strings.waiting, extra: "", tone: "tone-neutral" });
+}
+
+function useLanguage(lang) {
+  if (!languages[lang]) {
+    lang = "en";
+  }
+  currentLanguage = lang;
+  strings = languages[lang];
+  rememberLanguage(lang);
+  paintLanguage();
+  refreshResultLanguage();
+}
+
+function onLanguageClick(event) {
+  useLanguage(event.currentTarget.id === "lang-zh" ? "zh-Hant" : "en");
+}
+
+function start() {
+  var n;
+  var initial = languageFromLocation() || savedLanguage() || "en";
+  useLanguage(initial);
   document.getElementById("level").value = "85";
   document.getElementById("grade").value = "epic";
   document.getElementById("enhance").value = "0";
@@ -621,6 +702,8 @@ function start() {
   document.getElementById("grade").addEventListener("change", onPieceShapeChange);
   document.getElementById("enhance").addEventListener("change", onPieceShapeChange);
   document.getElementById("gear-form").addEventListener("submit", onCalculate);
+  document.getElementById("lang-en").addEventListener("click", onLanguageClick);
+  document.getElementById("lang-zh").addEventListener("click", onLanguageClick);
   for (n = 1; n <= 4; n++) {
     document.getElementById("sub-stat-" + n).addEventListener("change", onSubStatChange);
     document.getElementById("sub-value-" + n).addEventListener("input", onValueInput);

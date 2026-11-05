@@ -13,7 +13,7 @@ body {
   background:
     radial-gradient(ellipse 80% 40% at 50% -10%, rgba(196, 154, 74, 0.18), transparent 55%),
     #10141c;
-  font: 16px/1.45 "Segoe UI", system-ui, sans-serif;
+  font: 16px/1.45 "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
 }
 
 .banner {
@@ -22,9 +22,28 @@ body {
   padding: 1.5rem max(1.5rem, env(safe-area-inset-right)) 0.25rem max(1.5rem, env(safe-area-inset-left));
 }
 
+.banner-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.banner-top h1 {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.lang-switch {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.4rem;
+}
+
 h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "PMingLiU", "Microsoft JhengHei", serif;
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -146,6 +165,32 @@ button {
 }
 
 button:hover {
+  background: #f0d7a2;
+}
+
+.lang-switch button {
+  width: auto;
+  min-height: 2.4rem;
+  margin-top: 0.15rem;
+  padding: 0.35rem 0.8rem;
+  font-weight: 700;
+  color: #f0d7a2;
+  background: transparent;
+  border: 1px solid #8d7344;
+  border-radius: 999px;
+}
+
+.lang-switch button[aria-pressed="true"] {
+  color: #1a1408;
+  background: #e0c27a;
+  border-color: #e0c27a;
+}
+
+.lang-switch button:hover {
+  background: #2a2418;
+}
+
+.lang-switch button[aria-pressed="true"]:hover {
   background: #f0d7a2;
 }
 
