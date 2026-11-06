@@ -2,7 +2,7 @@
 
 // A finished left-side piece at this percent or higher counts as a high roll.
 var HIGH_ROLL_PERCENT = 80;
-// A right-side piece whose stats match the main stat.
+// A right-side piece whose matching stats rolled high enough to keep.
 var MATCH_PERCENT = 70;
 
 function isFlatMain(main) {
@@ -112,25 +112,131 @@ function speedMissed(piece) {
   return visible === 4 && piece.enhance >= 6 && speed > 0 && speed <= singleRollMax(piece.level) && coreCount(piece.subs) === 0;
 }
 
-function unfinishedBoots(piece) {
+function statIdsForKeep(piece) {
+  if (isSpeedBoots(piece) || tankMain(piece) || isLeftSide(piece.slot)) {
+    return tables.corePercents;
+  }
+  if (offensiveMain(piece)) {
+    return tables.offensivePercents;
+  }
+  return [];
+}
+
+function relevantScore(piece, scored) {
+  var ids = statIdsForKeep(piece);
+  var points = 0;
+  var max = 0;
+  var i;
+  if (!scored) {
+    return null;
+  }
+  for (i = 0; i < scored.lines.length; i++) {
+    if (ids.indexOf(scored.lines[i].stat) !== -1) {
+      points = points + scored.lines[i].points;
+      max = max + scored.lines[i].rolls * 100;
+    }
+  }
+  return {
+    points: points,
+    max: max,
+    percent: max > 0 ? Math.floor(points * 100 / max) : 0
+  };
+}
+
+function speedCeiling(piece) {
+  var speed = speedSub(piece.subs);
+  var used = tables.rollTotals[piece.grade][String(piece.enhance)];
+  var remaining = tables.rollTotals[piece.grade]["15"] - used;
+  if (remaining < 0) {
+    remaining = 0;
+  }
+  if (speed === 0) {
+    return 0;
+  }
+  return speed + remaining * singleRollMax(piece.level);
+}
+
+function unfinishedBoots(piece, scored) {
   var cores = coreCount(piece.subs);
   if (onlyFlats(piece.subs)) {
     return decision(strings.sellOnlyFlats, "", "tone-sell");
   }
+  if (cores === 0) {
+    return decision(strings.sellSpeedBootsThin, "", "tone-sell");
+  }
+  if (rollsTooLowToFinish(piece, scored)) {
+    return decision(strings.sellRollsLow, "", "tone-sell");
+  }
   if (cores >= 2) {
     return decision(withNext(strings.worthStats, piece.enhance), "", "tone-keep");
   }
-  if (cores === 1) {
-    return decision(withNext(strings.lookAgainOne, piece.enhance), "", "tone-extract");
-  }
-  return decision(strings.sellSpeedBootsThin, "", "tone-sell");
+  return decision(withNext(strings.lookAgainOne, piece.enhance), "", "tone-extract");
 }
 
-function unfinished(piece) {
+function keepBar(piece) {
+  if (isSpeedBoots(piece) && coreCount(piece.subs) >= 1) {
+    return MATCH_PERCENT;
+  }
+  if (isLeftSide(piece.slot) && coreCount(piece.subs) >= 2) {
+    return HIGH_ROLL_PERCENT;
+  }
+  if (isRightSide(piece.slot) && offensiveMain(piece) && offensiveCount(piece.subs) >= 2) {
+    return MATCH_PERCENT;
+  }
+  if (isRightSide(piece.slot) && tankMain(piece) && coreCount(piece.subs) >= 2) {
+    return MATCH_PERCENT;
+  }
+  return 0;
+}
+
+// From +6 on, all four lines are known. Perfect rolls on the stats that matter still have to clear the keep line.
+function rollsTooLowToFinish(piece, scored) {
+  var visible = tables.substatCounts[piece.grade][String(piece.enhance)];
+  var relevant;
+  var rolled;
+  var remaining;
+  var ceiling;
+  var bar;
+  if (piece.enhance < 6 || !scored || visible < 4 || speedIsStrong(piece)) {
+    return false;
+  }
+  bar = keepBar(piece);
+  if (bar === 0) {
+    return false;
+  }
+  relevant = relevantScore(piece, scored);
+  rolled = relevant.max / 100;
+  if (rolled === 0) {
+    return true;
+  }
+  remaining = tables.rollTotals[piece.grade]["15"] - scored.max / 100;
+  if (remaining < 0) {
+    remaining = 0;
+  }
+  ceiling = (relevant.points + remaining * 100) * 100 / ((rolled + remaining) * 100);
+  return ceiling < bar;
+}
+
+// One real stat, or a low speed that can never reach 15, cannot become a keep.
+function noPathLeft(piece) {
+  var visible = tables.substatCounts[piece.grade][String(piece.enhance)];
+  if (piece.enhance < 6 || visible < 4 || isSpeedBoots(piece) || speedIsStrong(piece)) {
+    return false;
+  }
+  if (coreCount(piece.subs) >= 2) {
+    return false;
+  }
+  if (speedSub(piece.subs) > 0 && speedCeiling(piece) >= 15) {
+    return false;
+  }
+  return true;
+}
+
+function unfinished(piece, scored) {
   var cores = coreCount(piece.subs);
   var speed = speedSub(piece.subs);
   if (isSpeedBoots(piece)) {
-    return unfinishedBoots(piece);
+    return unfinishedBoots(piece, scored);
   }
   if (onlyFlats(piece.subs)) {
     return decision(strings.sellOnlyFlats, "", "tone-sell");
@@ -141,10 +247,16 @@ function unfinished(piece) {
   if (speedMissed(piece)) {
     return decision(strings.sellSpeedMissed, "", "tone-sell");
   }
+  if (noPathLeft(piece)) {
+    return decision(strings.sellNoHope, "", "tone-sell");
+  }
+  if (rollsTooLowToFinish(piece, scored)) {
+    return decision(strings.sellRollsLow, "", "tone-sell");
+  }
   if (cores >= 2) {
     return decision(withNext(strings.worthStats, piece.enhance), "", "tone-keep");
   }
-  if (speed > 0 && cores >= 1) {
+  if (speed > 0 && cores >= 1 && speedIsStrong(piece)) {
     return decision(withNext(strings.worthSpeedAndStat, piece.enhance), "", "tone-keep");
   }
   if (speed > 0 && speedIsStrong(piece)) {
@@ -182,19 +294,23 @@ function matchedLow(piece, scored) {
   return false;
 }
 
-function finishedBoots(piece) {
-  if (coreCount(piece.subs) >= 1) {
+function finishedBoots(piece, percent) {
+  if (coreCount(piece.subs) >= 1 && percent >= MATCH_PERCENT) {
     return decision(strings.keepSpeedBoots, "", "tone-keep");
   }
-  return decision(strings.keepSpeedBootsWeakEnd, strings.keepSpeedBootsWeakNew, "tone-extract");
+  if (coreCount(piece.subs) >= 1) {
+    return decision(strings.extractRollsLow, "", "tone-extract");
+  }
+  return decision(strings.keepSpeedBootsWeakEnd, "", "tone-extract");
 }
 
 function finished(piece, scored) {
   var speed = speedSub(piece.subs);
   var cores = coreCount(piece.subs);
-  var percent = scored ? scored.percent : 0;
+  var relevant = relevantScore(piece, scored);
+  var percent = relevant ? relevant.percent : 0;
   if (isSpeedBoots(piece)) {
-    return finishedBoots(piece);
+    return finishedBoots(piece, percent);
   }
   if (speed >= 15) {
     return decision(strings.keepSpeedHigh, "", "tone-keep");
@@ -206,15 +322,12 @@ function finished(piece, scored) {
     return decision(strings.keepLeft, "", "tone-keep");
   }
   if (matchedLow(piece, scored)) {
-    return decision(strings.matchedLowEnd, strings.matchedLowNew, "tone-extract");
-  }
-  if (speed >= 9) {
-    return decision(strings.speedMidEnd, strings.speedMidNew, "tone-extract");
+    return decision(strings.extractRollsLow, "", "tone-extract");
   }
   if (cores === 0 && speed === 0) {
     return decision(strings.finishedEmpty, "", "tone-extract");
   }
-  return decision(strings.finishedMixedEnd, strings.finishedMixedNew, "tone-extract");
+  return decision(strings.extractNotGood, "", "tone-extract");
 }
 
 function verdict(piece, scored) {
@@ -228,7 +341,7 @@ function verdict(piece, scored) {
     return decision(strings.noSubs, "", "tone-neutral");
   }
   if (piece.enhance < 15) {
-    return unfinished(piece);
+    return unfinished(piece, scored);
   }
   return finished(piece, scored);
 }
