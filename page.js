@@ -636,6 +636,7 @@ function paintLanguage() {
   setText("main-label", strings.main);
   setText("substats-legend", strings.substats);
   setText("calculate", strings.calculate);
+  setText("reset", strings.reset);
   setText("summary-title", strings.summaryTitle);
   setText("score-title", strings.scoreTitle);
   setText("detail-title", strings.detailTitle);
@@ -687,14 +688,47 @@ function onLanguageClick(event) {
   useLanguage(event.currentTarget.id === "lang-zh" ? "zh-Hant" : "en");
 }
 
+function clearValueInputs() {
+  var n;
+  var input;
+  for (n = 1; n <= 4; n++) {
+    input = document.getElementById("sub-value-" + n);
+    input.value = "";
+    input.classList.remove("invalid");
+  }
+}
+
+function setDefaultPiece() {
+  document.getElementById("slot").value = "weapon";
+  document.getElementById("level").value = "85";
+  document.getElementById("grade").value = "epic";
+  document.getElementById("enhance").value = "0";
+  clearValueInputs();
+  onSlotChange();
+  onLevelChange();
+  onPieceShapeChange();
+}
+
+function clearResults() {
+  currentPiece = null;
+  lastRolls = null;
+  resultMode = "waiting";
+  showSummary({ text: strings.waiting, extra: "", tone: "tone-neutral" });
+  showScore("", false);
+  showDetailMessage("");
+  clearResultExtras();
+}
+
+function onReset(event) {
+  event.preventDefault();
+  setDefaultPiece();
+  clearResults();
+}
+
 function start() {
   var n;
   var initial = languageFromLocation() || savedLanguage() || "en";
   useLanguage(initial);
-  document.getElementById("level").value = "85";
-  document.getElementById("grade").value = "epic";
-  document.getElementById("enhance").value = "0";
-  document.getElementById("slot").value = "weapon";
 
   document.getElementById("slot").addEventListener("change", onSlotChange);
   document.getElementById("main").addEventListener("change", onMainChange);
@@ -702,6 +736,7 @@ function start() {
   document.getElementById("grade").addEventListener("change", onPieceShapeChange);
   document.getElementById("enhance").addEventListener("change", onPieceShapeChange);
   document.getElementById("gear-form").addEventListener("submit", onCalculate);
+  document.getElementById("reset").addEventListener("click", onReset);
   document.getElementById("lang-en").addEventListener("click", onLanguageClick);
   document.getElementById("lang-zh").addEventListener("click", onLanguageClick);
   for (n = 1; n <= 4; n++) {
@@ -710,9 +745,7 @@ function start() {
   }
   document.getElementById("detail-text").addEventListener("input", onRollCountChange);
 
-  onSlotChange();
-  onLevelChange();
-  onPieceShapeChange();
+  setDefaultPiece();
 }
 
 document.addEventListener("DOMContentLoaded", start);

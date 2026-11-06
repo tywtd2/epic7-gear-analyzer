@@ -168,6 +168,22 @@ button:hover {
   background: #f0d7a2;
 }
 
+.actions {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.7rem;
+}
+
+#reset {
+  color: #f0d7a2;
+  background: transparent;
+  border: 1px solid #8d7344;
+}
+
+#reset:hover {
+  background: #2a2418;
+}
+
 .lang-switch button {
   width: auto;
   min-height: 2.4rem;
